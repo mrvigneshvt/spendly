@@ -4,6 +4,7 @@ import { transactionsRepo } from '@/data/transactionsRepo';
 import { categoriesRepo } from '@/data/categoriesRepo';
 import { periodRange } from './period';
 import { buildCategorySlices } from './aggregations';
+import { formatPaise } from '@/util/formatPaise';
 
 interface Props {
   onDrillCategory: (categoryId: string) => void;
@@ -48,16 +49,16 @@ export function DashboardScreen({ onDrillCategory }: Props) {
       <View style={styles.headline}>
         <View style={styles.headlineItem}>
           <Text style={styles.headlineLabel}>Income</Text>
-          <Text style={[styles.headlineValue, styles.credit]}>+₹{(sums.credit / 100).toFixed(2)}</Text>
+          <Text style={[styles.headlineValue, styles.credit]}>+{formatPaise(sums.credit)}</Text>
         </View>
         <View style={styles.headlineItem}>
           <Text style={styles.headlineLabel}>Expense</Text>
-          <Text style={[styles.headlineValue, styles.debit]}>-₹{(sums.debit / 100).toFixed(2)}</Text>
+          <Text style={[styles.headlineValue, styles.debit]}>-{formatPaise(sums.debit)}</Text>
         </View>
         <View style={styles.headlineItem}>
           <Text style={styles.headlineLabel}>Net</Text>
           <Text style={[styles.headlineValue, net >= 0 ? styles.credit : styles.debit]}>
-            {net >= 0 ? '+' : ''}₹{(net / 100).toFixed(2)}
+            {net >= 0 ? '+' : ''}{formatPaise(net)}
           </Text>
         </View>
       </View>
@@ -72,7 +73,7 @@ export function DashboardScreen({ onDrillCategory }: Props) {
           <View style={styles.catInfo}>
             <Text style={styles.catName}>{s.name}</Text>
             <Text style={styles.catPct}>{s.pct.toFixed(1)}%</Text>
-            <Text style={styles.catAmount}>₹{(s.total / 100).toFixed(2)}</Text>
+            <Text style={styles.catAmount}>{formatPaise(s.total)}</Text>
           </View>
         </TouchableOpacity>
       ))}

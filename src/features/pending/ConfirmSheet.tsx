@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { Transaction, Category, Subcategory, TxType } from '@/data/types';
+import { formatPaise } from '@/util/formatPaise';
 
 interface Props {
   tx: Transaction;
@@ -18,7 +19,7 @@ export function ConfirmSheet({ tx, categories, subcategoriesFor, onConfirm, onDi
 
   return (
     <View style={styles.container}>
-      <Text style={styles.amount}>₹{(tx.amount / 100).toFixed(2)}</Text>
+      <Text style={styles.amount}>{formatPaise(tx.amount)}</Text>
       <Text style={styles.payee}>{tx.payee ?? 'Unknown'}</Text>
       <View style={styles.section}>
         <Text style={styles.label}>Type</Text>
