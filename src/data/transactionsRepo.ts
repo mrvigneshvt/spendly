@@ -20,12 +20,13 @@ export const transactionsRepo = {
     );
     return tid;
   },
-  confirm(id: string, p: { categoryId: string; subcategoryId: string; note?: string; payee?: string }, db = getDb()): void {
+  confirm(id: string, p: { categoryId: string; subcategoryId: string; note?: string; payee?: string; type?: TxType }, db = getDb()): void {
     if (!p.categoryId || !p.subcategoryId) throw new Error('category and subcategory are required to confirm');
     const cols: string[] = ['status=?', 'category_id=?', 'subcategory_id=?'];
     const vals: any[] = ['confirmed', p.categoryId, p.subcategoryId];
     if ('note' in p) { cols.push('note=?'); vals.push(p.note ?? null); }
     if ('payee' in p) { cols.push('payee=?'); vals.push(p.payee ?? null); }
+    if ('type' in p) { cols.push('type=?'); vals.push(p.type); }
     vals.push(id);
     db.execute(`UPDATE transactions SET ${cols.join(',')} WHERE id=?`, vals);
   },
