@@ -1,0 +1,15 @@
+export const DEFAULT_CATEGORIES: { name: string; icon: string; subs: string[] }[] = [
+  { name: 'Food & Dining', icon: '🍽️', subs: ['Groceries', 'Dining Out', 'Food Delivery', 'Tea/Coffee'] },
+  { name: 'Transport', icon: '🚕', subs: ['Fuel', 'Cab/Auto', 'Public Transit', 'Parking'] },
+  { name: 'Bills & Utilities', icon: '💡', subs: ['Electricity', 'Water', 'Mobile/DTH', 'Internet', 'Gas'] },
+  { name: 'Shopping', icon: '🛍️', subs: ['Clothing', 'Electronics', 'Household', 'Online'] },
+  { name: 'Health', icon: '🩺', subs: ['Pharmacy', 'Doctor', 'Insurance', 'Fitness'] },
+  { name: 'Entertainment', icon: '🎬', subs: ['Streaming', 'Movies', 'Games', 'Events'] },
+  { name: 'Housing', icon: '🏠', subs: ['Rent', 'Maintenance', 'Repairs'] },
+  { name: 'Education', icon: '📚', subs: ['Fees', 'Courses', 'Books'] },
+  { name: 'Personal Care', icon: '💇', subs: ['Salon', 'Grooming'] },
+  { name: 'Income', icon: '💰', subs: ['Salary', 'Business', 'Interest', 'Refund'] },
+  { name: 'Transfers', icon: '🔁', subs: ['UPI Transfer', 'Bank Transfer', 'Wallet', 'ATM Cash'] },
+  { name: 'Investments', icon: '📈', subs: ['Mutual Funds', 'Stocks', 'SIP', 'Gold'] },
+  { name: 'Miscellaneous', icon: '🗂️', subs: ['Other'] },
+];
