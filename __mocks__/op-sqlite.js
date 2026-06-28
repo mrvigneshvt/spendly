@@ -10,11 +10,15 @@ function MockDB() {
 
 MockDB.prototype._evalWhere = function(row, clause, params) {
   if (!clause) return true;
-  var parts = clause.split(/\s+AND\s+/i);
   var paramIdx = 0;
   var results = [];
+  // Split on AND but protect BETWEEN x AND y by replacing the AND in BETWEEN with a sentinel
+  var clauseProtected = clause.replace(/BETWEEN\s+\?\s+AND\s+\?/g, function(m) {
+    return m.replace(' AND ', ' ___AND___ ');
+  });
+  var parts = clauseProtected.split(/\s+AND\s+/i);
   for (var pi = 0; pi < parts.length; pi++) {
-    var part = parts[pi].trim();
+    var part = parts[pi].trim().replace(/\s*___AND___\s*/g, ' AND ');
 
     // BETWEEN ? AND ?
     var betweenMatch = part.match(/(\w+)\s+BETWEEN\s+\?\s+AND\s+\?/i);
