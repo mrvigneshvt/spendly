@@ -20,6 +20,18 @@ test('refresh loads pending; confirm removes from pending list', () => {
   expect(usePendingStore.getState().items).toHaveLength(0);
 });
 
+test('confirm with type override persists it', () => {
+  repo.insertDraft({
+    amount: 100, type: 'debit', date: 1, categoryId: null, subcategoryId: null,
+    note: null, payee: null, source: 'X', status: 'pending', origin: 'sms',
+    rawSmsBody: 'x', rawSmsSender: 'X', dedupeHash: 'b',
+  } as any);
+  usePendingStore.getState().refresh();
+  const tid = usePendingStore.getState().items[0].id;
+  usePendingStore.getState().confirm(tid, { categoryId: 'c1', subcategoryId: 's1', type: 'credit' });
+  expect(repo.listByStatus('confirmed')[0].type).toBe('credit');
+});
+
 test('discard removes item', () => {
   repo.insertDraft({
     amount: 100, type: 'debit', date: 1, categoryId: null, subcategoryId: null,
