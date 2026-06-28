@@ -24,6 +24,14 @@ test('confirm moves status to confirmed', () => {
   expect(repo.listByStatus('pending')).toHaveLength(0);
 });
 
+test('confirm preserves existing payee and note when not supplied', () => {
+  const tid = repo.insertDraft(draft({ note: 'lunch' }) as any);
+  repo.confirm(tid, { categoryId: 'c1', subcategoryId: 's1' });
+  const rows = repo.listByStatus('confirmed');
+  expect(rows[0].payee).toBe('SWIGGY');
+  expect(rows[0].note).toBe('lunch');
+});
+
 test('dedupe: existsByHash detects duplicate', () => {
   repo.insertDraft(draft() as any);
   expect(repo.existsByHash('h1')).toBe(true);
