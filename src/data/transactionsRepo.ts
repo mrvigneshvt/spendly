@@ -22,8 +22,12 @@ export const transactionsRepo = {
   },
   confirm(id: string, p: { categoryId: string; subcategoryId: string; note?: string; payee?: string }, db = getDb()): void {
     if (!p.categoryId || !p.subcategoryId) throw new Error('category and subcategory are required to confirm');
-    db.execute('UPDATE transactions SET status=?, category_id=?, subcategory_id=?, note=?, payee=? WHERE id=?',
-      ['confirmed', p.categoryId, p.subcategoryId, p.note ?? null, p.payee ?? null, id]);
+    const cols: string[] = ['status=?', 'category_id=?', 'subcategory_id=?'];
+    const vals: any[] = ['confirmed', p.categoryId, p.subcategoryId];
+    if ('note' in p) { cols.push('note=?'); vals.push(p.note ?? null); }
+    if ('payee' in p) { cols.push('payee=?'); vals.push(p.payee ?? null); }
+    vals.push(id);
+    db.execute(`UPDATE transactions SET ${cols.join(',')} WHERE id=?`, vals);
   },
   listByStatus(status: TxStatus, db = getDb()): Transaction[] {
     return (db.execute('SELECT * FROM transactions WHERE status=? ORDER BY date DESC', [status]).rows?._array ?? []).map(rowToTx);
