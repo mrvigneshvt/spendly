@@ -10,3 +10,15 @@ test.each([
 ])('classifies "%s" as %s', (body, expected) => {
   expect(classifyType(body)).toBe(expected);
 });
+
+test('when both debit and credit keywords present, picks the first verb', () => {
+  expect(classifyType('Rs.500 debited from a/c. Rs.10 credited as cashback')).toBe('debit');
+});
+
+test('negated credit does not trigger credit classification', () => {
+  expect(classifyType('Rs.500 was not credited')).toBeNull();
+});
+
+test('negated debit does not trigger debit classification', () => {
+  expect(classifyType('not debited')).toBeNull();
+});
