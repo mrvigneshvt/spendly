@@ -74,6 +74,12 @@ test('confirm preserves existing type when type not supplied', () => {
   expect(rows[0].type).toBe('credit');
 });
 
+test('created_at stores insertion time not transaction date', () => {
+  const tid = repo.insertDraft(draft({ date: 100 }) as any, undefined, 999);
+  const rows = db.execute('SELECT created_at FROM transactions WHERE id=?', [tid]).rows._array;
+  expect(rows[0].created_at).toBe(999);
+});
+
 test('listInRange returns confirmed transactions in date range', () => {
   const tid = repo.insertDraft(draft({ date: 100 }) as any);
   repo.confirm(tid, { categoryId: 'c1', subcategoryId: 's1' });

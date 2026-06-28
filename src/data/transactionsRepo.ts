@@ -11,12 +11,12 @@ const rowToTx = (r: any): Transaction => ({
 });
 
 export const transactionsRepo = {
-  insertDraft(d: DraftTransaction, db = getDb()): string {
+  insertDraft(d: DraftTransaction, db = getDb(), now = Date.now()): string {
     const tid = id('tx');
     db.execute(
       `INSERT INTO transactions (id,amount,type,date,category_id,subcategory_id,note,payee,source,status,origin,raw_sms_body,raw_sms_sender,dedupe_hash,created_at)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [tid, d.amount, d.type, d.date, d.categoryId, d.subcategoryId, d.note, d.payee, d.source, d.status, d.origin, d.rawSmsBody, d.rawSmsSender, d.dedupeHash, d.date],
+      [tid, d.amount, d.type, d.date, d.categoryId, d.subcategoryId, d.note, d.payee, d.source, d.status, d.origin, d.rawSmsBody, d.rawSmsSender, d.dedupeHash, now],
     );
     return tid;
   },
