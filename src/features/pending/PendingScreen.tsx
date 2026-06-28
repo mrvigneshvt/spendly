@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { usePendingStore } from './pendingStore';
 import { ConfirmSheet } from './ConfirmSheet';
 import { categoriesRepo } from '@/data/categoriesRepo';
+import { formatPaise } from '@/util/formatPaise';
 
 export function PendingScreen() {
   const { items, refresh, confirm, discard } = usePendingStore();
@@ -32,7 +33,7 @@ export function PendingScreen() {
       keyExtractor={i => i.id}
       renderItem={({ item }) => (
         <TouchableOpacity style={styles.row} onPress={() => setSelectedTx(item.id)}>
-          <Text style={styles.amount}>₹{(item.amount / 100).toFixed(2)}</Text>
+          <Text style={styles.amount}>{formatPaise(item.amount)}</Text>
           <Text style={styles.payee}>{item.payee ?? item.source ?? 'Unknown'}</Text>
           <Text style={styles.date}>{new Date(item.date).toLocaleDateString()}</Text>
         </TouchableOpacity>

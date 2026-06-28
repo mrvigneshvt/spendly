@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { transactionsRepo } from '@/data/transactionsRepo';
 import { categoriesRepo } from '@/data/categoriesRepo';
 import { periodRange } from './period';
+import { formatPaise } from '@/util/formatPaise';
 
 interface Props {
   categoryId: string;
@@ -48,13 +49,13 @@ export function CategoryDrillScreen({ categoryId, onBack }: Props) {
         renderItem={({ item }) => (
           <View style={styles.subRow}>
             <Text style={styles.subName}>{item.name}</Text>
-            <Text style={styles.subAmount}>₹{(item.total / 100).toFixed(2)}</Text>
+            <Text style={styles.subAmount}>{formatPaise(item.total)}</Text>
           </View>
         )}
         ListHeaderComponent={
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalAmount}>₹{(transactions.reduce((s, t) => s + t.amount, 0) / 100).toFixed(2)}</Text>
+            <Text style={styles.totalAmount}>{formatPaise(transactions.reduce((s, t) => s + t.amount, 0))}</Text>
           </View>
         }
       />

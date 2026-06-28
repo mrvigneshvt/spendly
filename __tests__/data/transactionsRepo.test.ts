@@ -24,6 +24,14 @@ test('confirm moves status to confirmed', () => {
   expect(repo.listByStatus('pending')).toHaveLength(0);
 });
 
+test('confirm preserves existing payee and note when not supplied', () => {
+  const tid = repo.insertDraft(draft({ note: 'lunch' }) as any);
+  repo.confirm(tid, { categoryId: 'c1', subcategoryId: 's1' });
+  const rows = repo.listByStatus('confirmed');
+  expect(rows[0].payee).toBe('SWIGGY');
+  expect(rows[0].note).toBe('lunch');
+});
+
 test('dedupe: existsByHash detects duplicate', () => {
   repo.insertDraft(draft() as any);
   expect(repo.existsByHash('h1')).toBe(true);
@@ -50,6 +58,26 @@ test('breakdownByCategory returns totals per category', () => {
   const breakdown = repo.breakdownByCategory(0, 2_000_000_000_000, 'debit');
   expect(breakdown.find(b => b.categoryId === 'cat1')?.total).toBe(8000);
   expect(breakdown.find(b => b.categoryId === 'cat2')?.total).toBe(2000);
+});
+
+test('confirm persists type override when provided', () => {
+  const tid = repo.insertDraft(draft({ type: 'debit' }) as any);
+  repo.confirm(tid, { categoryId: 'c1', subcategoryId: 's1', type: 'credit' });
+  const rows = repo.listByStatus('confirmed');
+  expect(rows[0].type).toBe('credit');
+});
+
+test('confirm preserves existing type when type not supplied', () => {
+  const tid = repo.insertDraft(draft({ type: 'credit' }) as any);
+  repo.confirm(tid, { categoryId: 'c1', subcategoryId: 's1' });
+  const rows = repo.listByStatus('confirmed');
+  expect(rows[0].type).toBe('credit');
+});
+
+test('created_at stores insertion time not transaction date', () => {
+  const tid = repo.insertDraft(draft({ date: 100 }) as any, undefined, 999);
+  const rows = db.execute('SELECT created_at FROM transactions WHERE id=?', [tid]).rows._array;
+  expect(rows[0].created_at).toBe(999);
 });
 
 test('listInRange returns confirmed transactions in date range', () => {

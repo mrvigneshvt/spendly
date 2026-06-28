@@ -3,6 +3,7 @@ package com.spendly.sms;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 
@@ -16,16 +17,24 @@ public class SmsReceiver extends BroadcastReceiver {
     StringBuilder body = new StringBuilder();
     String sender = "";
     long date = System.currentTimeMillis();
+    boolean first = true;
     for (Object pdu : pdus) {
       SmsMessage sms = SmsMessage.createFromPdu((byte[]) pdu, b.getString("format"));
       body.append(sms.getMessageBody());
-      sender = sms.getOriginatingAddress();
-      date = sms.getTimestampMillis();
+      if (first) {
+        sender = sms.getOriginatingAddress();
+        date = sms.getTimestampMillis();
+        first = false;
+      }
     }
     Intent service = new Intent(context, SmsHeadlessTask.class);
     service.putExtra("sender", sender);
     service.putExtra("body", body.toString());
     service.putExtra("date", date);
-    context.startService(service);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      context.startForegroundService(service);
+    } else {
+      context.startService(service);
+    }
   }
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import { transactionsRepo } from '@/data/transactionsRepo';
 import { filterTransactions } from './filter';
+import { formatPaise } from '@/util/formatPaise';
 
 export function LedgerScreen() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -48,7 +49,7 @@ export function LedgerScreen() {
               {item.categoryId && <Text style={styles.cat}>{item.categoryId}</Text>}
             </View>
             <Text style={[styles.amount, item.type === 'credit' ? styles.credit : styles.debit]}>
-              {item.type === 'credit' ? '+' : '-'}₹{(item.amount / 100).toFixed(2)}
+              {item.type === 'credit' ? '+' : '-'}{formatPaise(item.amount)}
             </Text>
           </View>
         )}
