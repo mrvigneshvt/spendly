@@ -44,12 +44,19 @@ MockDB.prototype._evalWhere = function(row, clause, params) {
       continue;
     }
 
-    // col=?
-    var eqMatch = part.match(/(\w+)\s*=\s*\?/);
-    if (eqMatch) {
-      var col = eqMatch[1];
+    // col=?  or col=literal
+    var eqMatchQ = part.match(/(\w+)\s*=\s*\?/);
+    if (eqMatchQ) {
+      var col = eqMatchQ[1];
       var val = params[paramIdx++];
       results.push(row[col] === val);
+      continue;
+    }
+    var eqMatchLit = part.match(/(\w+)\s*=\s*(\d+)/);
+    if (eqMatchLit) {
+      var col = eqMatchLit[1];
+      var val = parseInt(eqMatchLit[2], 10);
+      results.push(row[col] === val || row[col] === !!val);
       continue;
     }
 
