@@ -9,3 +9,11 @@ test.each([
 ])('extracts amount from "%s"', (body, expected) => {
   expect(extractAmountPaise(body)).toBe(expected);
 });
+
+test('skips balance figure when balance appears first', () => {
+  expect(extractAmountPaise('Avl Bal Rs.50,000.00. Rs.1,000.00 debited')).toBe(100000);
+});
+
+test('skips balance figure when balance appears last', () => {
+  expect(extractAmountPaise('Rs.250 spent on lunch. Avl Bal Rs.9,999.00')).toBe(25000);
+});
