@@ -2,7 +2,7 @@ import { AppRegistry } from 'react-native';
 import { ingestRaw } from './ingest';
 import type { RawSms } from '@/parser';
 
-export async function handleHeadlessSms(raw: RawSms): Promise<void> {
+export function handleHeadlessSms(raw: RawSms): void {
   try { ingestRaw(raw); } catch (e) { /* swallow: headless must not crash */ }
 }
 
