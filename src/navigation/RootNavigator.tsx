@@ -24,7 +24,7 @@ function LedgerStack() {
   if (showManual) {
     return <ManualEntryScreen onSaved={() => setShowManual(false)} />;
   }
-  return <LedgerScreen />;
+  return <LedgerScreen onAddEntry={() => setShowManual(true)} />;
 }
 
 export function RootNavigator() {

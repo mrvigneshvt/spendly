@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import { transactionsRepo } from '@/data/transactionsRepo';
+import { categoriesRepo } from '@/data/categoriesRepo';
 import { filterTransactions } from './filter';
 import { formatPaise } from '@/util/formatPaise';
 
-export function LedgerScreen() {
+export function LedgerScreen({ onAddEntry }: { onAddEntry?: () => void }) {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [query, setQuery] = useState('');
@@ -18,10 +19,19 @@ export function LedgerScreen() {
     setTransactions(items);
   }, []);
 
+  const categories = useMemo(() => categoriesRepo.listCategories(), []);
+  const categoryName = useCallback((id: string) => categories.find(c => c.id === id)?.name ?? id, [categories]);
   const filtered = useMemo(() => filterTransactions(transactions, { type: typeFilter, q: query || undefined }), [transactions, typeFilter, query]);
 
   return (
     <View style={{ flex: 1 }}>
+      <View style={styles.headerRow}>
+        {onAddEntry && (
+          <TouchableOpacity style={styles.addBtn} onPress={onAddEntry}>
+            <Text style={styles.addBtnText}>+ Add</Text>
+          </TouchableOpacity>
+        )}
+      </View>
       <View style={styles.filterRow}>
         <TextInput
           style={styles.search}
@@ -32,7 +42,7 @@ export function LedgerScreen() {
         <TouchableOpacity style={[styles.filterBtn, !typeFilter && styles.filterActive]} onPress={() => setTypeFilter(undefined)}>
           <Text>All</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.filterBtn, typeFilter === 'expense' && styles.filterActive]} onPress={() => setTypeFilter('expense')}>
+        <TouchableOpacity style={[styles.filterBtn, typeFilter === 'debit' && styles.filterActive]} onPress={() => setTypeFilter('debit')}>
           <Text>Expense</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.filterBtn, typeFilter === 'credit' && styles.filterActive]} onPress={() => setTypeFilter('credit')}>
@@ -46,7 +56,7 @@ export function LedgerScreen() {
           <View style={styles.row}>
             <View>
               <Text style={styles.payee}>{item.payee ?? 'Unknown'}</Text>
-              {item.categoryId && <Text style={styles.cat}>{item.categoryId}</Text>}
+              {item.categoryId && <Text style={styles.cat}>{categoryName(item.categoryId)}</Text>}
             </View>
             <Text style={[styles.amount, item.type === 'credit' ? styles.credit : styles.debit]}>
               {item.type === 'credit' ? '+' : '-'}{formatPaise(item.amount)}
@@ -59,6 +69,9 @@ export function LedgerScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerRow: { flexDirection: 'row', justifyContent: 'flex-end', padding: 8 },
+  addBtn: { paddingHorizontal: 14, paddingVertical: 6, backgroundColor: '#007AFF', borderRadius: 8 },
+  addBtnText: { color: '#fff', fontWeight: '600' },
   filterRow: { flexDirection: 'row', padding: 8, gap: 4, alignItems: 'center' },
   search: { flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 6, marginRight: 4 },
   filterBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, backgroundColor: '#eee' },
