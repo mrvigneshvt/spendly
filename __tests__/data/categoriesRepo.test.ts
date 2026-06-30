@@ -34,8 +34,9 @@ test('addSubcategory adds to a category', () => {
   seedDefaults(db);
   const cats = categoriesRepo.listCategories(db);
   const cid = cats[0].id;
+  const before = categoriesRepo.listSubcategories(cid, db).length;
   categoriesRepo.addSubcategory(cid, 'New Sub', db);
-  expect(categoriesRepo.listSubcategories(cid, db).length).toBeGreaterThanOrEqual(cats[0].subcategories?.length ?? 0 + 1);
+  expect(categoriesRepo.listSubcategories(cid, db).length).toBe(before + 1);
 });
 
 test('renameCategory updates name', () => {
