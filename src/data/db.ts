@@ -17,7 +17,7 @@ export function runMigrations(db: DB = getDb()): void {
     for (const sql of MIGRATIONS) db.execute(sql);
     db.execute('COMMIT');
   } catch (e) {
-    db.execute('ROLLBACK');
+    try { db.execute('ROLLBACK'); } catch { /* ROLLBACK failure must not mask the original error */ }
     throw e;
   }
 }
