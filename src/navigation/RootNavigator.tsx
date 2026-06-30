@@ -22,10 +22,12 @@ function DashboardStack() {
 
 function LedgerStack() {
   const [showManual, setShowManual] = React.useState(false);
+  const [refreshKey, setRefreshKey] = React.useState(0);
+  const onSaved = React.useCallback(() => { setRefreshKey(k => k + 1); setShowManual(false); }, []);
   if (showManual) {
-    return <ManualEntryScreen onSaved={() => setShowManual(false)} />;
+    return <ManualEntryScreen onSaved={onSaved} />;
   }
-  return <LedgerScreen onAddEntry={() => setShowManual(true)} />;
+  return <LedgerScreen onAddEntry={() => setShowManual(true)} refreshKey={refreshKey} />;
 }
 
 export function RootNavigator() {

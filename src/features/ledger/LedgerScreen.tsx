@@ -5,7 +5,7 @@ import { categoriesRepo } from '@/data/categoriesRepo';
 import { filterTransactions } from './filter';
 import { formatPaise } from '@/util/formatPaise';
 
-export function LedgerScreen({ onAddEntry }: { onAddEntry?: () => void }) {
+export function LedgerScreen({ onAddEntry, refreshKey }: { onAddEntry?: () => void; refreshKey?: number }) {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [query, setQuery] = useState('');
@@ -17,7 +17,7 @@ export function LedgerScreen({ onAddEntry }: { onAddEntry?: () => void }) {
     monthStart.setHours(0, 0, 0, 0);
     const items = transactionsRepo.listInRange(monthStart.getTime(), now + 86400000);
     setTransactions(items);
-  }, []);
+  }, [refreshKey]);
 
   const categories = useMemo(() => categoriesRepo.listCategories(), []);
   const categoryName = useCallback((id: string) => categories.find(c => c.id === id)?.name ?? id, [categories]);
