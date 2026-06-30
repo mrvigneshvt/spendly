@@ -1,12 +1,26 @@
 import { PermissionsAndroid } from 'react-native';
 
-export async function requestSmsPermissions(): Promise<boolean> {
+export type PermissionResult = 'granted' | 'denied' | 'never_ask_again';
+
+async function _requestDetailed(): Promise<PermissionResult> {
   const res = await PermissionsAndroid.requestMultiple([
     PermissionsAndroid.PERMISSIONS.READ_SMS,
     PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
   ]);
-  return res[PermissionsAndroid.PERMISSIONS.READ_SMS] === PermissionsAndroid.RESULTS.GRANTED &&
-         res[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] === PermissionsAndroid.RESULTS.GRANTED;
+  const readResult = res[PermissionsAndroid.PERMISSIONS.READ_SMS];
+  const recvResult = res[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS];
+  if (readResult === PermissionsAndroid.RESULTS.GRANTED &&
+      recvResult === PermissionsAndroid.RESULTS.GRANTED) return 'granted';
+  if (readResult === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN || recvResult === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) return 'never_ask_again';
+  return 'denied';
+}
+
+export async function requestSmsPermissions(): Promise<boolean> {
+  return (await _requestDetailed()) === 'granted';
+}
+
+export async function requestSmsPermissionsDetailed(): Promise<PermissionResult> {
+  return _requestDetailed();
 }
 
 export async function hasSmsPermissions(): Promise<boolean> {

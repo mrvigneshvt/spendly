@@ -1,6 +1,8 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { requestSmsPermissions } from '@/sms/permissions';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { requestSmsPermissionsDetailed } from '@/sms/permissions';
+import { backfill } from '@/sms/inbox';
+import { markBackfilled } from '@/app/bootstrap';
 
 interface Props {
   onGranted: () => void;
@@ -8,10 +10,48 @@ interface Props {
 }
 
 export function PermissionGate({ onGranted, onSkip }: Props) {
+  const [status, setStatus] = useState<'prompt' | 'never_ask_again'>('prompt');
+  const [busy, setBusy] = useState(false);
+  const mounted = React.useRef(true);
+  React.useEffect(() => { return () => { mounted.current = false; }; }, []);
+
   const handleGrant = async () => {
-    const ok = await requestSmsPermissions();
-    if (ok) onGranted();
+    setBusy(true);
+    const result = await requestSmsPermissionsDetailed();
+    if (!mounted.current) return;
+    if (result === 'granted') {
+      try {
+        await backfill();
+        markBackfilled();
+      } catch {
+        // backfill error is non-fatal; bootstrap will retry on next launch
+      }
+      if (mounted.current) onGranted();
+      return;
+    }
+    if (result === 'never_ask_again') {
+      if (mounted.current) setStatus('never_ask_again');
+    }
+    if (mounted.current) setBusy(false);
   };
+
+  if (status === 'never_ask_again') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.icon}>⚠️</Text>
+        <Text style={styles.title}>Permission permanently denied</Text>
+        <Text style={styles.body}>
+          SMS permission was denied with 'Never ask again'. You can enable it in your device's Settings app, or use Spendly in manual-only mode.
+        </Text>
+        <TouchableOpacity style={styles.grantBtn} onPress={() => Linking.openSettings()}>
+          <Text style={styles.grantText}>Open Settings</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.skipBtn} onPress={onSkip}>
+          <Text style={styles.skipText}>Manual only</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -21,8 +61,8 @@ export function PermissionGate({ onGranted, onSkip }: Props) {
         Spendly reads SMS messages from your inbox to automatically detect transactions.
         All processing happens on-device — nothing is sent over the network.
       </Text>
-      <TouchableOpacity style={styles.grantBtn} onPress={handleGrant}>
-        <Text style={styles.grantText}>Grant SMS Access</Text>
+      <TouchableOpacity style={styles.grantBtn} onPress={handleGrant} disabled={busy}>
+        <Text style={styles.grantText}>{busy ? 'Granting...' : 'Grant SMS Access'}</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.skipBtn} onPress={onSkip}>
         <Text style={styles.skipText}>Not now — manual only</Text>

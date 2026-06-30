@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, Modal, StyleSheet } from 'react-native';
 import { categoriesRepo } from '@/data/categoriesRepo';
 
 export function CategoriesScreen() {
@@ -7,6 +7,8 @@ export function CategoriesScreen() {
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
   const [newCatName, setNewCatName] = useState('');
   const [newSubName, setNewSubName] = useState('');
+  const [renameTarget, setRenameTarget] = useState<{ id: string; currentName: string } | null>(null);
+  const [renameText, setRenameText] = useState('');
 
   const refresh = () => setCategories(categoriesRepo.listCategories());
   useEffect(() => { refresh(); }, []);
@@ -26,9 +28,17 @@ export function CategoriesScreen() {
   };
 
   const renameCategory = (id: string) => {
-    Alert.prompt?.('Rename', 'New name:', (name) => {
-      if (name?.trim()) { categoriesRepo.renameCategory(id, name.trim()); refresh(); }
-    });
+    const cat = categories.find(c => c.id === id);
+    setRenameText(cat?.name ?? '');
+    setRenameTarget({ id, currentName: cat?.name ?? '' });
+  };
+
+  const confirmRename = () => {
+    if (renameTarget && renameText.trim()) {
+      categoriesRepo.renameCategory(renameTarget.id, renameText.trim());
+      refresh();
+    }
+    setRenameTarget(null);
   };
 
   const deleteCategory = (id: string) => {
@@ -41,6 +51,7 @@ export function CategoriesScreen() {
   };
 
   return (
+    <>
     <FlatList
       data={categories}
       keyExtractor={c => c.id}
@@ -69,11 +80,35 @@ export function CategoriesScreen() {
         </View>
       }
     />
+      <Modal visible={renameTarget !== null} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Rename category</Text>
+            <TextInput style={styles.modalInput} value={renameText} onChangeText={setRenameText} autoFocus />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.modalCancel} onPress={() => setRenameTarget(null)}>
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirm} onPress={confirmRename}>
+                <Text style={{ color: '#fff' }}>Rename</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   catRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 14, borderBottomWidth: 1, borderColor: '#eee', alignItems: 'center' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
+  modalContent: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  modalInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, fontSize: 16 },
+  modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16, gap: 8 },
+  modalCancel: { padding: 10, borderRadius: 8, backgroundColor: '#eee' },
+  modalConfirm: { padding: 10, borderRadius: 8, backgroundColor: '#007AFF' },
   deleteBtn: { color: '#c62828', fontSize: 18, padding: 4 },
   subSection: { paddingLeft: 24, paddingVertical: 8, backgroundColor: '#fafafa' },
   subItem: { paddingVertical: 4, fontSize: 14, color: '#555' },

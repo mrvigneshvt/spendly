@@ -38,17 +38,33 @@ test('bootstrap runs migrations and seeds defaults', async () => {
   expect(cats.length).toBeGreaterThan(0);
 });
 
-test('deny then later grant permission triggers exactly one backfill', async () => {
+test('deny on first run, grant on second cold start triggers backfill', async () => {
   mockHasPerms.mockResolvedValue(false);
   mockRequestPerms.mockResolvedValue(false);
   mockBackfill.mockResolvedValue({ scanned: 0, inserted: 0 });
   await bootstrap();
   expect(mockBackfill).not.toHaveBeenCalled();
 
+  // Simulate user granted SMS via system settings before next cold start
   mockHasPerms.mockResolvedValue(true);
   const result = await bootstrap();
   expect(result.firstRun).toBe(false);
   expect(mockBackfill).toHaveBeenCalledTimes(1);
+});
+
+test('backfill runs on a later cold start once SMS permission is granted via settings', async () => {
+  mockHasPerms.mockResolvedValue(false);
+  mockRequestPerms.mockResolvedValue(false);
+  const first = await bootstrap();
+  expect(first.firstRun).toBe(true);
+  expect(mockBackfill).not.toHaveBeenCalled();
+
+  // User has granted SMS via system settings since last cold start
+  mockHasPerms.mockResolvedValue(true);
+  const second = await bootstrap();
+  expect(second.firstRun).toBe(false);
+  expect(mockBackfill).toHaveBeenCalledTimes(1);
+  expect(second.backfill).toBeDefined();
 });
 
 test('backfill error does not crash bootstrap', async () => {
