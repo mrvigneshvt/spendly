@@ -11,23 +11,26 @@ interface Props {
 export function PermissionGate({ onGranted, onSkip }: Props) {
   const [status, setStatus] = useState<'prompt' | 'never_ask_again'>('prompt');
   const [busy, setBusy] = useState(false);
+  const mounted = React.useRef(true);
+  React.useEffect(() => { return () => { mounted.current = false; }; }, []);
 
   const handleGrant = async () => {
     setBusy(true);
     const result = await requestSmsPermissionsDetailed();
+    if (!mounted.current) return;
     if (result === 'granted') {
       try {
         await backfill();
       } catch {
         // backfill error is non-fatal
       }
-      onGranted();
+      if (mounted.current) onGranted();
       return;
     }
     if (result === 'never_ask_again') {
-      setStatus('never_ask_again');
+      if (mounted.current) setStatus('never_ask_again');
     }
-    setBusy(false);
+    if (mounted.current) setBusy(false);
   };
 
   if (status === 'never_ask_again') {

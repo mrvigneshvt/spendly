@@ -11,7 +11,7 @@ async function _requestDetailed(): Promise<PermissionResult> {
   const recvResult = res[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS];
   if (readResult === PermissionsAndroid.RESULTS.GRANTED &&
       recvResult === PermissionsAndroid.RESULTS.GRANTED) return 'granted';
-  if (readResult === 'never_ask_again' || recvResult === 'never_ask_again') return 'never_ask_again';
+  if (readResult === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN || recvResult === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) return 'never_ask_again';
   return 'denied';
 }
 

@@ -28,13 +28,31 @@ export async function bootstrap(): Promise<{ firstRun: boolean; backfill?: { sca
 
   let backfillResult: { scanned: number; inserted: number } | undefined;
   if (!alreadyBackfilled) {
-    const hasPerms = await hasSmsPermissions();
-    if (hasPerms || await requestSmsPermissions()) {
+    let hasPerms = false;
+    try { hasPerms = await hasSmsPermissions(); } catch { hasPerms = false; }
+    if (hasPerms) {
       try {
         backfillResult = await backfill();
         setMeta(db, 'backfilled', '1');
       } catch {
         backfillResult = undefined;
+      }
+    } else {
+      const skipRow = db.execute("SELECT value FROM meta WHERE key=?", ['permission_skipped']).rows?._array?.[0];
+      const alreadySkipped = skipRow && skipRow.value === '1';
+      if (!alreadySkipped) {
+        let granted = false;
+        try { granted = await requestSmsPermissions(); } catch { granted = false; }
+        if (granted) {
+          try {
+            backfillResult = await backfill();
+            setMeta(db, 'backfilled', '1');
+          } catch {
+            backfillResult = undefined;
+          }
+        } else {
+          setMeta(db, 'permission_skipped', '1');
+        }
       }
     }
   }
