@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from '@/theme/ThemeContext';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { PermissionGate } from '@/app/PermissionGate';
 import { bootstrap } from '@/app/bootstrap';
@@ -23,19 +24,23 @@ export default function App() {
   if (permGate) {
     return (
       <SafeAreaProvider>
-        <PermissionGate
-          onGranted={() => setPermGate(false)}
-          onSkip={() => setPermGate(false)}
-        />
+        <ThemeProvider>
+          <PermissionGate
+            onGranted={() => setPermGate(false)}
+            onSkip={() => setPermGate(false)}
+          />
+        </ThemeProvider>
       </SafeAreaProvider>
     );
   }
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
+      <ThemeProvider>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
