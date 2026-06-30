@@ -51,6 +51,22 @@ test('deny then later grant permission triggers exactly one backfill', async () 
   expect(mockBackfill).toHaveBeenCalledTimes(1);
 });
 
+test('backfill via PermissionGate grant handler after bootstrap denied', async () => {
+  // First bootstrap: permissions denied, no backfill
+  mockHasPerms.mockResolvedValue(false);
+  mockRequestPerms.mockResolvedValue(false);
+  const first = await bootstrap();
+  expect(first.firstRun).toBe(true);
+  expect(mockBackfill).not.toHaveBeenCalled();
+
+  // Simulate PermissionGate grant: permissions now granted, backfill runs
+  mockHasPerms.mockResolvedValue(true);
+  const second = await bootstrap();
+  expect(second.firstRun).toBe(false);
+  expect(mockBackfill).toHaveBeenCalledTimes(1);
+  expect(second.backfill).toBeDefined();
+});
+
 test('backfill error does not crash bootstrap', async () => {
   mockHasPerms.mockResolvedValue(true);
   mockBackfill.mockRejectedValue(new Error('permission revoked'));

@@ -221,14 +221,15 @@ MockDB.prototype.execute = function(sql, params) {
       var result;
       if (groupByMatch) {
         var groupCol = groupByMatch[1];
-        var groups = {};
+        var groups = new Map();
         filtered.forEach(function(r) {
           var key = r[groupCol] !== undefined ? r[groupCol] : null;
-          if (!groups[key]) groups[key] = [];
-          groups[key].push(r);
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(r);
         });
-        result = Object.keys(groups).map(function(k) {
-          var grp = groups[k];
+        result = Array.from(groups.entries()).map(function(entry) {
+          var k = entry[0];
+          var grp = entry[1];
           var o = {};
           o[groupCol] = k;
           selectExprs.forEach(function(se) {
