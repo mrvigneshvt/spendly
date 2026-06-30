@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { transactionsRepo } from '@/data/transactionsRepo';
 import { categoriesRepo } from '@/data/categoriesRepo';
@@ -8,11 +8,13 @@ import { formatPaise } from '@/util/formatPaise';
 
 interface Props {
   onDrillCategory: (categoryId: string) => void;
+  periodKind: 'month' | 'week';
+  onSetPeriodKind: (k: 'month' | 'week') => void;
+  anchor: number;
+  onSetAnchor: (a: number) => void;
 }
 
-export function DashboardScreen({ onDrillCategory }: Props) {
-  const [periodKind, setPeriodKind] = useState<'month' | 'week'>('month');
-  const [anchor, setAnchor] = useState(Date.now());
+export function DashboardScreen({ onDrillCategory, periodKind, onSetPeriodKind, anchor, onSetAnchor }: Props) {
 
   const { from, to } = useMemo(() => periodRange(periodKind, anchor), [periodKind, anchor]);
   const sums = useMemo(() => transactionsRepo.sumByType(from, to), [from, to]);
@@ -26,7 +28,7 @@ export function DashboardScreen({ onDrillCategory }: Props) {
     const d = new Date(anchor);
     if (periodKind === 'month') d.setMonth(d.getMonth() + dir);
     else d.setDate(d.getDate() + 7 * dir);
-    setAnchor(d.getTime());
+    onSetAnchor(d.getTime());
   };
 
   return (
@@ -35,10 +37,10 @@ export function DashboardScreen({ onDrillCategory }: Props) {
       <View style={styles.periodRow}>
         <TouchableOpacity onPress={() => navigatePeriod(-1)}><Text style={styles.navBtn}>◀</Text></TouchableOpacity>
         <View style={styles.periodChips}>
-          <TouchableOpacity style={[styles.chip, periodKind === 'month' && styles.chipActive]} onPress={() => setPeriodKind('month')}>
+          <TouchableOpacity style={[styles.chip, periodKind === 'month' && styles.chipActive]} onPress={() => onSetPeriodKind('month')}>
             <Text style={periodKind === 'month' ? styles.chipActiveText : undefined}>Month</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.chip, periodKind === 'week' && styles.chipActive]} onPress={() => setPeriodKind('week')}>
+          <TouchableOpacity style={[styles.chip, periodKind === 'week' && styles.chipActive]} onPress={() => onSetPeriodKind('week')}>
             <Text style={periodKind === 'week' ? styles.chipActiveText : undefined}>Week</Text>
           </TouchableOpacity>
         </View>

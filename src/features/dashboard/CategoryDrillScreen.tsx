@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { transactionsRepo } from '@/data/transactionsRepo';
 import { categoriesRepo } from '@/data/categoriesRepo';
@@ -8,11 +8,11 @@ import { formatPaise } from '@/util/formatPaise';
 interface Props {
   categoryId: string;
   onBack: () => void;
+  periodKind: 'month' | 'week';
+  anchor: number;
 }
 
-export function CategoryDrillScreen({ categoryId, onBack }: Props) {
-  const [periodKind] = useState<'month' | 'week'>('month');
-  const [anchor] = useState(Date.now());
+export function CategoryDrillScreen({ categoryId, onBack, periodKind, anchor }: Props) {
   const { from, to } = useMemo(() => periodRange(periodKind, anchor), [periodKind, anchor]);
 
   const transactions = useMemo(() => {
