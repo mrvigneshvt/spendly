@@ -10,7 +10,12 @@ export default function App() {
   const [permGate, setPermGate] = useState(true);
 
   useEffect(() => {
-    bootstrap().then(() => setReady(true));
+    bootstrap().then((r) => {
+      // Skip the rationale gate for users who have already granted SMS access,
+      // so returning users aren't re-prompted on every launch.
+      if (r.smsGranted) setPermGate(false);
+      setReady(true);
+    });
   }, []);
 
   if (!ready) return null;

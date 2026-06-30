@@ -52,7 +52,7 @@ test('deny on first run, grant on second cold start triggers backfill', async ()
   expect(mockBackfill).toHaveBeenCalledTimes(1);
 });
 
-test('backfill retry after permission_skipped is cleared (simulates PermissionGate grant)', async () => {
+test('backfill runs on a later cold start once SMS permission is granted via settings', async () => {
   mockHasPerms.mockResolvedValue(false);
   mockRequestPerms.mockResolvedValue(false);
   const first = await bootstrap();
