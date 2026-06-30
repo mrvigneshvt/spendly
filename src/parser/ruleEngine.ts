@@ -4,6 +4,18 @@ import { extractAmountPaise } from './amount';
 import { classifyType } from './classify';
 import { extractPayee } from './payee';
 
+// Simple heuristic: flag patterns with nested quantifiers (potential catastrophic backtracking)
+const CATASTROPHIC_RE = /\(.[+*]\)[+*]/;
+
+export function isRegexSafe(pattern: string): boolean {
+  try {
+    new RegExp(pattern);
+  } catch {
+    return false;
+  }
+  return !CATASTROPHIC_RE.test(pattern);
+}
+
 function ruleMatches(rule: ParseRule, raw: RawSms): boolean {
   try {
     return new RegExp(rule.senderPattern, 'i').test(raw.sender) &&

@@ -2,9 +2,8 @@ import type { RawSms, ParseResult } from './types';
 import type { DraftTransaction } from '@/data/types';
 
 export function dedupeHash(raw: RawSms): string {
-  // simple stable djb2 over sender|body|dateBucket(minute)
-  const bucket = Math.floor(raw.date / 60000);
-  const s = `${raw.sender}|${raw.body}|${bucket}`;
+  // stable hash over sender|body|exactTimestamp — no minute bucketing so same-body SMS with different timestamps don't collide
+  const s = `${raw.sender}|${raw.body}|${raw.date}`;
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
   return h.toString(36);
