@@ -51,6 +51,7 @@ export function CategoriesScreen() {
   };
 
   return (
+    <>
     <FlatList
       data={categories}
       keyExtractor={c => c.id}
@@ -95,7 +96,7 @@ export function CategoriesScreen() {
           </View>
         </View>
       </Modal>
-  );
+    </>
 }
 
 const styles = StyleSheet.create({
