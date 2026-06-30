@@ -1,8 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, Modal, StyleSheet } from 'react-native';
 import { categoriesRepo } from '@/data/categoriesRepo';
+import { useTheme } from '@/theme/ThemeContext';
+import type { ThemeColors } from '@/theme/colors';
+
+function useCategoriesStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    catRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 14, borderBottomWidth: 1, borderColor: colors.border, alignItems: 'center' },
+    modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: 24 },
+    modalContent: { backgroundColor: colors.modalBg, borderRadius: 12, padding: 20 },
+    modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12, color: colors.text },
+    modalInput: { borderWidth: 1, borderColor: colors.inputBorder, borderRadius: 8, padding: 12, fontSize: 16, color: colors.text, backgroundColor: colors.background },
+    modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16, gap: 8 },
+    modalCancel: { padding: 10, borderRadius: 8, backgroundColor: colors.chipBg },
+    modalConfirm: { padding: 10, borderRadius: 8, backgroundColor: colors.primary },
+    deleteBtn: { color: colors.danger, fontSize: 18, padding: 4 },
+    subSection: { paddingLeft: 24, paddingVertical: 8, backgroundColor: colors.surface },
+    subItem: { paddingVertical: 4, fontSize: 14, color: colors.textSecondary },
+    subInput: { borderWidth: 1, borderColor: colors.inputBorder, borderRadius: 6, padding: 8, marginTop: 8, color: colors.text, backgroundColor: colors.background },
+    addRow: { flexDirection: 'row', padding: 12, gap: 8 },
+    addInput: { flex: 1, borderWidth: 1, borderColor: colors.inputBorder, borderRadius: 8, padding: 10, color: colors.text, backgroundColor: colors.background },
+    addBtn: { padding: 10, backgroundColor: colors.primary, borderRadius: 8, justifyContent: 'center' },
+    addBtnText: { color: colors.chipSelectedText, fontSize: 18, fontWeight: 'bold' },
+    catName: { fontSize: 15, color: colors.text },
+    cancelText: { color: colors.text },
+    confirmText: { color: colors.chipSelectedText },
+  });
+}
 
 export function CategoriesScreen() {
+  const { colors } = useTheme();
+  const s = useCategoriesStyles(colors);
   const [categories, setCategories] = useState<any[]>([]);
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
   const [newCatName, setNewCatName] = useState('');
@@ -51,70 +79,51 @@ export function CategoriesScreen() {
   };
 
   return (
-    <>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
     <FlatList
       data={categories}
       keyExtractor={c => c.id}
       renderItem={({ item }) => (
         <View>
-          <TouchableOpacity style={styles.catRow} onPress={() => setExpandedCat(expandedCat === item.id ? null : item.id)} onLongPress={() => renameCategory(item.id)}>
-            <Text>{item.icon ?? '📁'} {item.name}</Text>
+          <TouchableOpacity style={s.catRow} onPress={() => setExpandedCat(expandedCat === item.id ? null : item.id)} onLongPress={() => renameCategory(item.id)}>
+            <Text style={s.catName}>{item.icon ?? '📁'} {item.name}</Text>
             <TouchableOpacity onPress={() => deleteCategory(item.id)}>
-              <Text style={styles.deleteBtn}>✕</Text>
+              <Text style={s.deleteBtn}>✕</Text>
             </TouchableOpacity>
           </TouchableOpacity>
           {expandedCat === item.id && (
-            <View style={styles.subSection}>
+            <View style={s.subSection}>
               {categoriesRepo.listSubcategories(item.id).map((s: any) => (
-                <Text key={s.id} style={styles.subItem}>{s.name}</Text>
+                <Text key={s.id} style={s.subItem}>{s.name}</Text>
               ))}
-              <TextInput style={styles.subInput} placeholder="Add subcategory..." value={newSubName} onChangeText={setNewSubName} onSubmitEditing={() => addSubcategory(item.id)} />
+              <TextInput style={s.subInput} placeholder="Add subcategory..." placeholderTextColor={colors.textTertiary} value={newSubName} onChangeText={setNewSubName} onSubmitEditing={() => addSubcategory(item.id)} />
             </View>
           )}
         </View>
       )}
       ListHeaderComponent={
-        <View style={styles.addRow}>
-          <TextInput style={styles.addInput} placeholder="New category name..." value={newCatName} onChangeText={setNewCatName} onSubmitEditing={addCategory} />
-          <TouchableOpacity style={styles.addBtn} onPress={addCategory}><Text style={styles.addBtnText}>+</Text></TouchableOpacity>
+        <View style={s.addRow}>
+          <TextInput style={s.addInput} placeholder="New category name..." placeholderTextColor={colors.textTertiary} value={newCatName} onChangeText={setNewCatName} onSubmitEditing={addCategory} />
+          <TouchableOpacity style={s.addBtn} onPress={addCategory}><Text style={s.addBtnText}>+</Text></TouchableOpacity>
         </View>
       }
     />
       <Modal visible={renameTarget !== null} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Rename category</Text>
-            <TextInput style={styles.modalInput} value={renameText} onChangeText={setRenameText} autoFocus />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalCancel} onPress={() => setRenameTarget(null)}>
-                <Text>Cancel</Text>
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <Text style={s.modalTitle}>Rename category</Text>
+            <TextInput style={s.modalInput} value={renameText} onChangeText={setRenameText} autoFocus placeholderTextColor={colors.textTertiary} />
+            <View style={s.modalButtons}>
+              <TouchableOpacity style={s.modalCancel} onPress={() => setRenameTarget(null)}>
+                <Text style={s.cancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalConfirm} onPress={confirmRename}>
-                <Text style={{ color: '#fff' }}>Rename</Text>
+              <TouchableOpacity style={s.modalConfirm} onPress={confirmRename}>
+                <Text style={s.confirmText}>Rename</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  catRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 14, borderBottomWidth: 1, borderColor: '#eee', alignItems: 'center' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
-  modalContent: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
-  modalInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, fontSize: 16 },
-  modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16, gap: 8 },
-  modalCancel: { padding: 10, borderRadius: 8, backgroundColor: '#eee' },
-  modalConfirm: { padding: 10, borderRadius: 8, backgroundColor: '#007AFF' },
-  deleteBtn: { color: '#c62828', fontSize: 18, padding: 4 },
-  subSection: { paddingLeft: 24, paddingVertical: 8, backgroundColor: '#fafafa' },
-  subItem: { paddingVertical: 4, fontSize: 14, color: '#555' },
-  subInput: { borderWidth: 1, borderColor: '#ddd', borderRadius: 6, padding: 8, marginTop: 8 },
-  addRow: { flexDirection: 'row', padding: 12, gap: 8 },
-  addInput: { flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10 },
-  addBtn: { padding: 10, backgroundColor: '#007AFF', borderRadius: 8, justifyContent: 'center' },
-  addBtnText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-});
