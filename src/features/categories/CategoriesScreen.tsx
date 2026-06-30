@@ -97,6 +97,7 @@ export function CategoriesScreen() {
         </View>
       </Modal>
     </>
+  );
 }
 
 const styles = StyleSheet.create({

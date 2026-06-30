@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import { requestSmsPermissionsDetailed } from '@/sms/permissions';
 import { backfill } from '@/sms/inbox';
+import { markBackfilled } from '@/app/bootstrap';
 
 interface Props {
   onGranted: () => void;
@@ -21,8 +22,9 @@ export function PermissionGate({ onGranted, onSkip }: Props) {
     if (result === 'granted') {
       try {
         await backfill();
+        markBackfilled();
       } catch {
-        // backfill error is non-fatal
+        // backfill error is non-fatal; bootstrap will retry on next launch
       }
       if (mounted.current) onGranted();
       return;

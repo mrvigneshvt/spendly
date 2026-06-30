@@ -17,6 +17,9 @@ export function isRegexSafe(pattern: string): boolean {
 }
 
 function ruleMatches(rule: ParseRule, raw: RawSms): boolean {
+  // ReDoS guard: never compile/run a user-supplied pattern that is invalid or
+  // exhibits catastrophic-backtracking shape. Such a rule is skipped, not run.
+  if (!isRegexSafe(rule.senderPattern) || !isRegexSafe(rule.bodyRegex)) return false;
   try {
     return new RegExp(rule.senderPattern, 'i').test(raw.sender) &&
            new RegExp(rule.bodyRegex, 'i').test(raw.body);
