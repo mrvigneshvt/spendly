@@ -1,17 +1,9 @@
-import SmsAndroid from 'react-native-get-sms-android';
+import { readInboxNative } from './nativeReader';
 import type { RawSms } from '@/parser';
 
-export function readInbox(): Promise<RawSms[]> {
-  return new Promise((resolve, reject) => {
-    SmsAndroid.list(
-      JSON.stringify({ box: 'inbox', maxCount: 2000 }),
-      (err: string) => reject(new Error(err)),
-      (_count: number, smsList: string) => {
-        const arr = JSON.parse(smsList) as { address: string; body: string; date: number }[];
-        resolve(arr.map(s => ({ sender: s.address, body: s.body, date: s.date })));
-      },
-    );
-  });
+export async function readInbox(): Promise<RawSms[]> {
+  const messages = await readInboxNative();
+  return messages.map(s => ({ sender: s.address, body: s.body, date: s.date }));
 }
 
 export async function backfill(): Promise<{ scanned: number; inserted: number }> {
