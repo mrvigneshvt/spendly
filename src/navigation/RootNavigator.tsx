@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
 import { PendingScreen } from '@/features/pending/PendingScreen';
 import { LedgerScreen } from '@/features/ledger/LedgerScreen';
@@ -9,14 +9,15 @@ import { ManualEntryScreen } from '@/features/ledger/ManualEntryScreen';
 import { CategoryDrillScreen } from '@/features/dashboard/CategoryDrillScreen';
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
 
 function DashboardStack() {
   const [drillCategory, setDrillCategory] = React.useState<string | null>(null);
+  const [periodKind, setPeriodKind] = React.useState<'month' | 'week'>('month');
+  const [anchor, setAnchor] = React.useState(Date.now());
   if (drillCategory) {
-    return <CategoryDrillScreen categoryId={drillCategory} onBack={() => setDrillCategory(null)} />;
+    return <CategoryDrillScreen categoryId={drillCategory} onBack={() => setDrillCategory(null)} periodKind={periodKind} anchor={anchor} />;
   }
-  return <DashboardScreen onDrillCategory={setDrillCategory} />;
+  return <DashboardScreen onDrillCategory={setDrillCategory} periodKind={periodKind} onSetPeriodKind={setPeriodKind} anchor={anchor} onSetAnchor={setAnchor} />;
 }
 
 function LedgerStack() {
