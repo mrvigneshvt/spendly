@@ -82,8 +82,8 @@ MockDB.prototype.execute = function(sql, params) {
     return { rows: { _array: [] } };
   }
 
-  // --- INSERT ---
-  var insertMatch = sql.match(/INSERT INTO (\w+)/i);
+  // --- INSERT / INSERT OR REPLACE ---
+  var insertMatch = sql.match(/(?:INSERT\s+OR\s+REPLACE\s+)?INTO\s+(\w+)/i);
   if (insertMatch) {
     var tableName = insertMatch[1];
     var colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
@@ -94,6 +94,12 @@ MockDB.prototype.execute = function(sql, params) {
       cols.forEach(function(col, i) {
         row[col] = params[i] !== undefined ? params[i] : null;
       });
+      // INSERT OR REPLACE: remove existing row with same key (first column = PK)
+      if (/INSERT\s+OR\s+REPLACE/i.test(sql)) {
+        var pkCol = cols[0];
+        var pkVal = params[0];
+        this.tables[tableName] = this.tables[tableName].filter(function(r) { return r[pkCol] !== pkVal; });
+      }
       this.tables[tableName].push(row);
     }
     return { rows: { _array: [] } };

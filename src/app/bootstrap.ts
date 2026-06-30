@@ -6,12 +6,7 @@ import { backfill } from '@/sms/inbox';
 import { registerSmsHeadlessTask } from '@/sms/liveBridge';
 
 function setMeta(db: any, key: string, value: string): void {
-  const existing = db.execute("SELECT value FROM meta WHERE key=?", [key]).rows?._array?.[0];
-  if (existing) {
-    db.execute("UPDATE meta SET value=? WHERE key=?", [value, key]);
-  } else {
-    db.execute("INSERT INTO meta (key,value) VALUES (?,?)", [key, value]);
-  }
+  db.execute("INSERT OR REPLACE INTO meta (key,value) VALUES (?,?)", [key, value]);
 }
 
 // PermissionGate calls this after it has granted permission and backfilled, so
