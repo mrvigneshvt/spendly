@@ -52,7 +52,17 @@ test('deny on first run, grant on second cold start triggers backfill', async ()
   expect(mockBackfill).toHaveBeenCalledTimes(1);
 });
 
-test('backfill retry after permission_skipped is cleared (simulates PermissionGate grant)', async () => {
+test('user grants SMS via system permission prompt on first run (hasPerms=false, requestPerms=true)', async () => {
+  mockHasPerms.mockResolvedValue(false);
+  mockRequestPerms.mockResolvedValue(true);
+  mockBackfill.mockResolvedValue({ scanned: 3, inserted: 2 });
+  const result = await bootstrap();
+  expect(result.firstRun).toBe(true);
+  expect(mockBackfill).toHaveBeenCalledTimes(1);
+  expect(result.backfill).toBeDefined();
+});
+
+test('permission denied on first run, granted via system settings next cold start triggers backfill', async () => {
   mockHasPerms.mockResolvedValue(false);
   mockRequestPerms.mockResolvedValue(false);
   const first = await bootstrap();

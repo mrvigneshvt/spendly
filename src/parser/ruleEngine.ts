@@ -18,6 +18,7 @@ export function isRegexSafe(pattern: string): boolean {
 
 function ruleMatches(rule: ParseRule, raw: RawSms): boolean {
   try {
+    if (!rule.isBuiltIn && (!isRegexSafe(rule.senderPattern) || !isRegexSafe(rule.bodyRegex))) return false;
     return new RegExp(rule.senderPattern, 'i').test(raw.sender) &&
            new RegExp(rule.bodyRegex, 'i').test(raw.body);
   } catch { return false; }
